@@ -27,21 +27,21 @@ public class ServerNit extends Thread {
 			primiPaket = new ObjectInputStream(soketZaKomunikaciju.getInputStream());
 			
 			while (true) {
-				System.out.println("sad treba da primi, ceka ga");
+				System.out.println("Cekanje paketa od klijenta...");
 				paket = (Paket) primiPaket.readObject();
-				System.out.println("Primio je objekat");
+				System.out.println("PRIJEM PAKETA");
 				if (paket.getType() == Paket.USERNAME) {
 					String trenutnoIme = paket.getPoruka();
 					System.out.println("Ime koje proveravamo je: " + trenutnoIme);
 					boolean imaGa = false;
 					for (int i = 0; i < klijenti.size(); i++) {
-						if (klijenti.get(i) != this && klijenti.get(i).ime.equals(trenutnoIme)) {
+						if (klijenti.get(i).ime != null && klijenti.get(i) != this && klijenti.get(i).ime.equals(trenutnoIme)) {
 							imaGa = true;
 							saljiPaket.writeObject(new Paket(Paket.INVALID_USERNAME));
 						}
 					}
 					if (!imaGa) {
-						System.out.println("Izgleda da ga nema");
+						System.out.println("Ime je uredu, uspesno logovanje.");
 						this.ime = trenutnoIme;
 						saljiPaket.writeObject(new Paket(Paket.VALID_USERNAME));
 					}
@@ -50,20 +50,27 @@ public class ServerNit extends Thread {
 				
 				if (paket.getType() == Paket.LIST_REQUEST) {
 					LinkedList<String> lista = new LinkedList<>();
+					System.out.print("Igraci koji su online: ");
 					for (int i = 0; i < klijenti.size(); i++) {
 						String tempIme = klijenti.get(i).ime;
 						if (tempIme != null && tempIme != this.ime) {
-							System.out.println("Dodajem klijenta + " + tempIme);
+							System.out.print(tempIme + "  ");
 							lista.add(tempIme);
 						}
 					}
 					if (lista.isEmpty()){
 					saljiPaket.writeObject(new Paket(lista, "NEMA IGRACA"));
-						System.out.println("Poslao paket da nema igraca");
+						System.out.println("TRENUTNO NEMA IGRACA NA SERVERU! (poslato: " + ime + ")");
 					}
 					else{
-						saljiPaket.writeObject(new Paket(lista, null));
-						System.out.println("Poslao listu gde ima igraca!");
+						for (int i = 0; i < klijenti.size(); i++) {
+							if (klijenti.get(i).ime == this.ime) {
+								saljiPaket.writeObject(new Paket(lista, null));
+								System.out.println("POSLAT SPISAK IGRACA KLIJENTU: " + klijenti.get(i).ime);
+							}
+						}
+//						saljiPaket.writeObject(new Paket(lista, null));
+//						System.out.println("POSLAT SPISAK IGRACA KLIJENTU: " + ime);
 					}
 				}
 				if (paket.getType() == Paket.MESSAGE && paket.getPoruka() != null && paket.getPoruka().equals("ZATVORI NIT")) {
@@ -77,8 +84,12 @@ public class ServerNit extends Thread {
 			System.out.println("Uklonio je nit iz nekog razloga");
 		} catch (IOException ex) {
 			ex.printStackTrace();
+			klijenti.remove(this);
+			System.out.println("Desila se greska i klijentska nit se ugasila");
 		} catch (Exception e) {
 			e.printStackTrace();
+			klijenti.remove(this);
+			System.out.println("Desila se greska i klijentska nit se ugasila");
 			// TODO: handle exception
 		}
 
