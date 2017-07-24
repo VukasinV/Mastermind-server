@@ -59,7 +59,7 @@ public class ServerNit extends Thread {
 						}
 					}
 					if (lista.isEmpty()){
-					saljiPaket.writeObject(new Paket(lista, "NEMA IGRACA"));
+					saljiPaket.writeObject(new Paket(Paket.NO_PLAYERS_ONLINE));
 						System.out.println("TRENUTNO NEMA IGRACA NA SERVERU! (poslato: " + ime + ")");
 					}
 					else{
