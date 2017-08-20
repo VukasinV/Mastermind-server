@@ -4,15 +4,18 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class ServerNit extends Thread {
 	Socket soketZaKomunikaciju = null;
 	LinkedList<ServerNit> klijenti;
-	public static ObjectOutputStream saljiPaket = null;
-	public static ObjectInputStream primiPaket = null;
+	public ObjectOutputStream saljiPaket = null;
+	public ObjectInputStream primiPaket = null;
 	String ime;
 	String imeProtivnika;
+	Map<ServerNit, ServerNit> trenutneIgre = new HashMap<>();
 
 	public ServerNit(Socket soket, LinkedList<ServerNit> klijent) {
 		this.soketZaKomunikaciju = soket;
@@ -22,10 +25,10 @@ public class ServerNit extends Thread {
 	public void run() {
 		Paket paket;
 		try {
-			
+
 			saljiPaket = new ObjectOutputStream(soketZaKomunikaciju.getOutputStream());
 			primiPaket = new ObjectInputStream(soketZaKomunikaciju.getInputStream());
-			
+
 			while (true) {
 				System.out.println("Cekanje paketa od klijenta...");
 				paket = (Paket) primiPaket.readObject();
@@ -35,7 +38,8 @@ public class ServerNit extends Thread {
 					System.out.println("Ime koje proveravamo je: " + trenutnoIme);
 					boolean imaGa = false;
 					for (int i = 0; i < klijenti.size(); i++) {
-						if (klijenti.get(i).ime != null && klijenti.get(i) != this && klijenti.get(i).ime.equals(trenutnoIme)) {
+						if (klijenti.get(i).ime != null && klijenti.get(i) != this
+								&& klijenti.get(i).ime.equals(trenutnoIme)) {
 							imaGa = true;
 							saljiPaket.writeObject(new Paket(Paket.INVALID_USERNAME));
 						}
@@ -47,7 +51,7 @@ public class ServerNit extends Thread {
 					}
 
 				}
-				
+
 				if (paket.getType() == Paket.LIST_REQUEST) {
 					LinkedList<String> lista = new LinkedList<>();
 					System.out.print("Igraci koji su online: ");
@@ -58,23 +62,51 @@ public class ServerNit extends Thread {
 							lista.add(tempIme);
 						}
 					}
-					if (lista.isEmpty()){
-					saljiPaket.writeObject(new Paket(Paket.NO_PLAYERS_ONLINE));
+					if (lista.isEmpty()) {
+						saljiPaket.writeObject(new Paket(Paket.NO_PLAYERS_ONLINE));
 						System.out.println("TRENUTNO NEMA IGRACA NA SERVERU! (poslato: " + ime + ")");
-					}
-					else{
-						for (int i = 0; i < klijenti.size(); i++) {
-							if (klijenti.get(i).ime == this.ime) {
-								saljiPaket.writeObject(new Paket(lista, null));
-								System.out.println("POSLAT SPISAK IGRACA KLIJENTU: " + klijenti.get(i).ime);
-							}
-						}
-//						saljiPaket.writeObject(new Paket(lista, null));
-//						System.out.println("POSLAT SPISAK IGRACA KLIJENTU: " + ime);
+					} else {
+						// for (int i = 0; i < klijenti.size(); i++) {
+						// if (klijenti.get(i).ime == this.ime) {
+						saljiPaket.writeObject(new Paket(lista, this.ime));
+						// System.out.println("POSLAT SPISAK IGRACA KLIJENTU: "
+						// + klijenti.get(i).ime);
+						// }
+						// }
+						// saljiPaket.writeObject(new Paket(lista, null));
+						// System.out.println("POSLAT SPISAK IGRACA KLIJENTU: "
+						// + ime);
 					}
 				}
-				if (paket.getType() == Paket.MESSAGE && paket.getPoruka() != null && paket.getPoruka().equals("ZATVORI NIT")) {
+				if (paket.getType() == Paket.MESSAGE && paket.getPoruka() != null
+						&& paket.getPoruka().equals("ZATVORI NIT")) {
 					break;
+				}
+
+				if (paket.getType() == Paket.CHOOSEN_PLAYER) {
+					System.out.println("Usao u potragu za izabranim ");
+					for (int i = 0; i < klijenti.size(); i++) {
+						System.out.println("usao u for..." + paket.getPoruka());
+						if (klijenti.get(i).ime.equals(paket.getPoruka())) {
+							System.out.println("Usao u if...");
+							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.CHOOSEN_PLAYER, this.ime));
+						}
+					}
+				}
+
+				if (paket.getType() == Paket.ACCEPTED) {
+					
+				}
+
+				if (paket.getType() == Paket.DECLINED) {
+					//saljiPaket.writeObject(new Paket(Paket.DECLINED));
+					for (int i = 0; i < klijenti.size(); i++) {
+						System.out.println("usao u for...");
+						if (klijenti.get(i).ime.equals(paket.getPoruka())) {
+							System.out.println("Usao u if...");
+							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.DECLINED, this.ime));
+						}
+					}
 				}
 			}
 
@@ -94,12 +126,25 @@ public class ServerNit extends Thread {
 		}
 
 	}
-	public static boolean hostAvailabilityCheck() { 
-	    try (Socket s = new Socket("localhost", 4444)) {
-	        return true;
-	    } catch (IOException ex) {
-	        /* ignore */
-	    }
-	    return false;
+
+	public void posaljiObojici(ServerNit a, ServerNit b, String kombinacija) {
+		try {
+			for (int i = 0; i < klijenti.size(); i++) {
+				if (klijenti.get(i).isAlive() && (klijenti.get(i) == a || klijenti.get(i) == b)) {
+					klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.COMBINATION, kombinacija));
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("Igra je prekinuta!");
+		}
+	}
+
+	public static boolean hostAvailabilityCheck() {
+		try (Socket s = new Socket("localhost", 4444)) {
+			return true;
+		} catch (IOException ex) {
+			/* ignore */
+		}
+		return false;
 	}
 }
