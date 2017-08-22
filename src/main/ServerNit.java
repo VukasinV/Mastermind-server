@@ -12,8 +12,10 @@ public class ServerNit extends Thread {
 	Socket soketZaKomunikaciju = null;
 	LinkedList<ServerNit> klijenti;
 	public ObjectOutputStream saljiPaket = null;
+	Game game;
 	public ObjectInputStream primiPaket = null;
 	String ime;
+	boolean mojaIgra;
 	String imeProtivnika;
 	boolean uIgric = false;
 	Map<ServerNit, ServerNit> trenutneIgre = new HashMap<>();
@@ -97,23 +99,47 @@ public class ServerNit extends Thread {
 
 				if (paket.getType() == Paket.ACCEPTED) {
 					System.out.println("Accepted server..");
-					
+
 					for (int i = 0; i < klijenti.size(); i++) {
 						System.out.println("usao u for...");
 						if (klijenti.get(i).ime.equals(paket.getPoruka())) {
 							System.out.println("Usao u if...");
-							System.out.println("Ime izabranog je " + this.ime + " A onog ko izaziva " + paket.getPoruka());
-							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.ACCEPTED, this.ime));
-							saljiPaket.writeObject(new Paket(Paket.ACCEPTED, klijenti.get(i).ime));		
+							System.out.println(
+									"Ime izabranog je " + this.ime + " A onog ko izaziva " + paket.getPoruka());
+							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.ACCEPTED, "izazvac si"));
+							saljiPaket.writeObject(new Paket(Paket.ACCEPTED, "izazvan si"));
+							klijenti.get(i).mojaIgra = true;
+							klijenti.get(i).game = new Game();
 							uIgric = true;
 							klijenti.get(i).uIgric = true;
+							imeProtivnika = klijenti.get(i).ime;
+							klijenti.get(i).imeProtivnika = this.ime;
 						}
 					}
-					
+
+				}
+
+				if (paket.getType() == Paket.COMBINATION) {
+					int a = Integer.parseInt(paket.getPoruka().split(",")[0]);
+					int b = Integer.parseInt(paket.getPoruka().split(",")[1]);
+					int c = Integer.parseInt(paket.getPoruka().split(",")[2]);
+					int d = Integer.parseInt(paket.getPoruka().split(",")[3]);
+					int red = paket.getRed();
+					if (mojaIgra) {
+						int brojPogodjenihNaMestu = game.vratiBrojPogodjenih(a, b, c, d, true);
+						int brojPogodjenihNisuNaMestu = game.vratiBrojPogodjenih(a, b, c, d, false);
+						saljiPaket.writeObject(new Paket(Paket.REZ, brojPogodjenihNaMestu + "," + brojPogodjenihNisuNaMestu, red));
+						for (int i = 0; i < klijenti.size(); i++) {
+							if (klijenti.get(i).ime.equals(imeProtivnika)) {
+								klijenti.get(i).saljiPaket.writeObject(paket);
+								klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.REZ, brojPogodjenihNaMestu + "," + brojPogodjenihNisuNaMestu, red));
+							}
+						}
+					}
 				}
 
 				if (paket.getType() == Paket.DECLINED) {
-					
+
 					for (int i = 0; i < klijenti.size(); i++) {
 						System.out.println("usao u for...");
 						if (klijenti.get(i).ime.equals(paket.getPoruka())) {
