@@ -15,6 +15,7 @@ public class ServerNit extends Thread {
 	public ObjectInputStream primiPaket = null;
 	String ime;
 	String imeProtivnika;
+	boolean uIgric = false;
 	Map<ServerNit, ServerNit> trenutneIgre = new HashMap<>();
 
 	public ServerNit(Socket soket, LinkedList<ServerNit> klijent) {
@@ -57,7 +58,7 @@ public class ServerNit extends Thread {
 					System.out.print("Igraci koji su online: ");
 					for (int i = 0; i < klijenti.size(); i++) {
 						String tempIme = klijenti.get(i).ime;
-						if (tempIme != null && tempIme != this.ime) {
+						if (tempIme != null && tempIme != this.ime && !klijenti.get(i).uIgric) {
 							System.out.print(tempIme + "  ");
 							lista.add(tempIme);
 						}
@@ -104,7 +105,8 @@ public class ServerNit extends Thread {
 							System.out.println("Ime izabranog je " + this.ime + " A onog ko izaziva " + paket.getPoruka());
 							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.ACCEPTED, this.ime));
 							saljiPaket.writeObject(new Paket(Paket.ACCEPTED, klijenti.get(i).ime));		
-							
+							uIgric = true;
+							klijenti.get(i).uIgric = true;
 						}
 					}
 					
