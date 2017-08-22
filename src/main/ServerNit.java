@@ -95,11 +95,23 @@ public class ServerNit extends Thread {
 				}
 
 				if (paket.getType() == Paket.ACCEPTED) {
+					System.out.println("Accepted server..");
+					
+					for (int i = 0; i < klijenti.size(); i++) {
+						System.out.println("usao u for...");
+						if (klijenti.get(i).ime.equals(paket.getPoruka())) {
+							System.out.println("Usao u if...");
+							System.out.println("Ime izabranog je " + this.ime + " A onog ko izaziva " + paket.getPoruka());
+							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.ACCEPTED, this.ime));
+							saljiPaket.writeObject(new Paket(Paket.ACCEPTED, klijenti.get(i).ime));		
+							
+						}
+					}
 					
 				}
 
 				if (paket.getType() == Paket.DECLINED) {
-					//saljiPaket.writeObject(new Paket(Paket.DECLINED));
+					
 					for (int i = 0; i < klijenti.size(); i++) {
 						System.out.println("usao u for...");
 						if (klijenti.get(i).ime.equals(paket.getPoruka())) {
