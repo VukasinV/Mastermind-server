@@ -128,13 +128,14 @@ public class ServerNit extends Thread {
 					if (mojaIgra) {
 						int brojPogodjenihNaMestu = game.vratiBrojPogodjenih(a, b, c, d, true);
 						int brojPogodjenihNisuNaMestu = game.vratiBrojPogodjenih(a, b, c, d, false);
-						saljiPaket.writeObject(new Paket(Paket.REZ, brojPogodjenihNaMestu + "," + brojPogodjenihNisuNaMestu, red));
+						
 						for (int i = 0; i < klijenti.size(); i++) {
 							if (klijenti.get(i).ime.equals(imeProtivnika)) {
 								klijenti.get(i).saljiPaket.writeObject(paket);
 								klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.REZ, brojPogodjenihNaMestu + "," + brojPogodjenihNisuNaMestu, red));
 							}
 						}
+						saljiPaket.writeObject(new Paket(Paket.REZ, brojPogodjenihNaMestu + "," + brojPogodjenihNisuNaMestu, red));
 					}
 				}
 
