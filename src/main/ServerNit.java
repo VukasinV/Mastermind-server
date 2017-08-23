@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 public class ServerNit extends Thread {
 	Socket soketZaKomunikaciju = null;
 	LinkedList<ServerNit> klijenti;
@@ -133,9 +136,24 @@ public class ServerNit extends Thread {
 							if (klijenti.get(i).ime.equals(imeProtivnika)) {
 								klijenti.get(i).saljiPaket.writeObject(paket);
 								klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.REZ, brojPogodjenihNaMestu + "," + brojPogodjenihNisuNaMestu, red));
+								
+								if(brojPogodjenihNaMestu == 4){
+									klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.WIN, a +","+b+","+c+","+d));
+									saljiPaket.writeObject(new Paket(Paket.WIN, a +","+b+","+c+","+d, red));
+								}
+								
 							}
 						}
 						saljiPaket.writeObject(new Paket(Paket.REZ, brojPogodjenihNaMestu + "," + brojPogodjenihNisuNaMestu, red));
+					}
+				}
+				
+				if(paket.getType() == Paket.TURN){
+					for (int i = 0; i < klijenti.size(); i++) {
+						if (klijenti.get(i).ime.equals(imeProtivnika)) {
+							klijenti.get(i).mojaIgra = true;
+							this.mojaIgra = false;
+						}
 					}
 				}
 
@@ -156,14 +174,13 @@ public class ServerNit extends Thread {
 			klijenti.remove(this);
 			System.out.println("Uklonio je nit iz nekog razloga");
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			//ex.printStackTrace();
 			klijenti.remove(this);
 			System.out.println("Desila se greska i klijentska nit se ugasila");
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			klijenti.remove(this);
-			System.out.println("Desila se greska i klijentska nit se ugasila");
-			// TODO: handle exception
+			System.out.println("Desila se greska i klijentska nit se ugasila");		
 		}
 
 	}
