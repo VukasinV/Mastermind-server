@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.text.html.HTMLDocument.HTMLReader.SpecialAction;
 
 public class ServerNit extends Thread {
 	Socket soketZaKomunikaciju = null;
@@ -92,27 +93,40 @@ public class ServerNit extends Thread {
 				if (paket.getType() == Paket.CHOOSEN_PLAYER) {
 					System.out.println("Usao u potragu za izabranim ");
 					for (int i = 0; i < klijenti.size(); i++) {
-						System.out.println("usao u for..." + paket.getPoruka());
+						//System.out.println("usao u for..." + paket.getPoruka());
+						if (klijenti.get(i).ime.equals(paket.getPoruka())) {
+							//System.out.println("Usao u if...");
+							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.CHOOSEN_PLAYER, this.ime));
+						}
+					}
+				}
+
+				if (paket.getType() == Paket.DECLINED) {
+					System.out.println("declined server..");
+					for (int i = 0; i < klijenti.size(); i++) {
+						System.out.println("usao u for...");
 						if (klijenti.get(i).ime.equals(paket.getPoruka())) {
 							System.out.println("Usao u if...");
-							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.CHOOSEN_PLAYER, this.ime));
+							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.DECLINED, this.ime));
 						}
 					}
 				}
 
 				if (paket.getType() == Paket.ACCEPTED) {
 					System.out.println("Accepted server..");
+					//System.out.println("Resenje: "+Game.q +","+ Game.w+ "," + Game.e + "," + Game.r);
 
 					for (int i = 0; i < klijenti.size(); i++) {
-						System.out.println("usao u for...");
+						//System.out.println("usao u for...");
 						if (klijenti.get(i).ime.equals(paket.getPoruka())) {
-							System.out.println("Usao u if...");
+							//System.out.println("Usao u if...");
 							System.out.println(
 									"Ime izabranog je " + this.ime + " A onog ko izaziva " + paket.getPoruka());
 							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.ACCEPTED, "izazvac si"));
 							saljiPaket.writeObject(new Paket(Paket.ACCEPTED, "izazvan si"));
 							klijenti.get(i).mojaIgra = true;
 							klijenti.get(i).game = new Game();
+							this.game = new Game();
 							uIgric = true;
 							klijenti.get(i).uIgric = true;
 							imeProtivnika = klijenti.get(i).ime;
@@ -128,42 +142,68 @@ public class ServerNit extends Thread {
 					int c = Integer.parseInt(paket.getPoruka().split(",")[2]);
 					int d = Integer.parseInt(paket.getPoruka().split(",")[3]);
 					int red = paket.getRed();
-					if (mojaIgra) {
+					//System.out.println("red : "+red);
+					//if (mojaIgra) {
 						int brojPogodjenihNaMestu = game.vratiBrojPogodjenih(a, b, c, d, true);
 						int brojPogodjenihNisuNaMestu = game.vratiBrojPogodjenih(a, b, c, d, false);
 						
+						System.out.println("Na mestu: "+brojPogodjenihNaMestu + " pogodjeni a nisu: "+brojPogodjenihNisuNaMestu);
+						
 						for (int i = 0; i < klijenti.size(); i++) {
 							if (klijenti.get(i).ime.equals(imeProtivnika)) {
+								System.out.println("Protivnik : "+imeProtivnika);
 								klijenti.get(i).saljiPaket.writeObject(paket);
-								klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.REZ, brojPogodjenihNaMestu + "," + brojPogodjenihNisuNaMestu, red));
-								
-								if(brojPogodjenihNaMestu == 4){
-									klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.WIN, a +","+b+","+c+","+d));
-									saljiPaket.writeObject(new Paket(Paket.WIN, a +","+b+","+c+","+d, red));
+								klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.REZ,
+										brojPogodjenihNaMestu + "," + brojPogodjenihNisuNaMestu, red));
+
+								if (brojPogodjenihNaMestu == 4) {
+									klijenti.get(i).saljiPaket
+											.writeObject(new Paket(Paket.WIN, a + "," + b + "," + c + "," + d));
+									saljiPaket.writeObject(new Paket(Paket.WIN, a + "," + b + "," + c + "," + d, red));
 								}
-								
+
 							}
 						}
-						saljiPaket.writeObject(new Paket(Paket.REZ, brojPogodjenihNaMestu + "," + brojPogodjenihNisuNaMestu, red));
-					}
+						saljiPaket.writeObject(
+								new Paket(Paket.REZ, brojPogodjenihNaMestu + "," + brojPogodjenihNisuNaMestu, red));
+					//}
 				}
-				
-				if(paket.getType() == Paket.TURN){
+
+				if (paket.getType() == Paket.TURN) {
+					//System.out.println("protivnik : " + imeProtivnika + " a ovaj je: " + this.ime);
+
 					for (int i = 0; i < klijenti.size(); i++) {
 						if (klijenti.get(i).ime.equals(imeProtivnika)) {
 							klijenti.get(i).mojaIgra = true;
 							this.mojaIgra = false;
+							saljiPaket.writeObject(new Paket(Paket.WARRNING));
+							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.TURN));
+						}
+					}
+				}
+				
+				if(paket.getType() == Paket.OFFLINE){
+					//System.out.println("offline");
+					int a = Game.q;
+					int b = Game.w;
+					int c = Game.e;
+					int d = Game.r;
+					for (int i = 0; i < klijenti.size(); i++) {
+						if (klijenti.get(i).ime.equals(imeProtivnika)) {
+							klijenti.get(i).uIgric = false;
+							uIgric = false;
+							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.WIN,a+","+b+","+c+","+d));
+							saljiPaket.writeObject(new Paket(Paket.WIN,a+","+b+","+c+","+d));
 						}
 					}
 				}
 
-				if (paket.getType() == Paket.DECLINED) {
-
+				if (paket.getType() == Paket.WIN) {
+					//System.out.println("win paket server, protivnik : "+imeProtivnika);
 					for (int i = 0; i < klijenti.size(); i++) {
-						System.out.println("usao u for...");
-						if (klijenti.get(i).ime.equals(paket.getPoruka())) {
-							System.out.println("Usao u if...");
-							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.DECLINED, this.ime));
+						if (klijenti.get(i).ime.equals(imeProtivnika)) {
+							klijenti.get(i).saljiPaket.writeObject(paket);
+							saljiPaket.writeObject(paket);
 						}
 					}
 				}
@@ -174,13 +214,13 @@ public class ServerNit extends Thread {
 			klijenti.remove(this);
 			System.out.println("Uklonio je nit iz nekog razloga");
 		} catch (IOException ex) {
-			//ex.printStackTrace();
+			// ex.printStackTrace();
 			klijenti.remove(this);
 			System.out.println("Desila se greska i klijentska nit se ugasila");
 		} catch (Exception e) {
-			//e.printStackTrace();
+			// e.printStackTrace();
 			klijenti.remove(this);
-			System.out.println("Desila se greska i klijentska nit se ugasila");		
+			System.out.println("Desila se greska i klijentska nit se ugasila");
 		}
 
 	}
