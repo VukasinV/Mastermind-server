@@ -7,10 +7,10 @@ public class Game {
 	public static int brPogodjenihNaMestu = 0;
 	public static int brPogodjenih = 0;
 	private LinkedList<String> users = new LinkedList<>();
-	int q = ThreadLocalRandom.current().nextInt(1, 7);
-	int w = ThreadLocalRandom.current().nextInt(1, 7);
-	int e = ThreadLocalRandom.current().nextInt(1, 7);
-	int r = ThreadLocalRandom.current().nextInt(1, 7);
+	static int q = ThreadLocalRandom.current().nextInt(1, 7);
+	static int w = ThreadLocalRandom.current().nextInt(1, 7);
+	static int e = ThreadLocalRandom.current().nextInt(1, 7);
+	static int r = ThreadLocalRandom.current().nextInt(1, 7);
 	// pik......1
 	// tref.....2
 	// herc.....3
