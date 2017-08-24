@@ -91,7 +91,7 @@ public class ServerNit extends Thread {
 				}
 
 				if (paket.getType() == Paket.CHOOSEN_PLAYER) {
-					System.out.println("Usao u potragu za izabranim ");
+					//System.out.println("Usao u potragu za izabranim ");
 					for (int i = 0; i < klijenti.size(); i++) {
 						//System.out.println("usao u for..." + paket.getPoruka());
 						if (klijenti.get(i).ime.equals(paket.getPoruka())) {
@@ -114,7 +114,7 @@ public class ServerNit extends Thread {
 
 				if (paket.getType() == Paket.ACCEPTED) {
 					System.out.println("Accepted server..");
-					//System.out.println("Resenje: "+Game.q +","+ Game.w+ "," + Game.e + "," + Game.r);
+					System.out.println("Resenje: "+Game.q +","+ Game.w+ "," + Game.e + "," + Game.r);
 
 					for (int i = 0; i < klijenti.size(); i++) {
 						//System.out.println("usao u for...");
