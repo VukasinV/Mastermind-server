@@ -16,7 +16,7 @@ public class ServerNit extends Thread {
 	Socket soketZaKomunikaciju = null;
 	LinkedList<ServerNit> klijenti;
 	public ObjectOutputStream saljiPaket = null;
-	Game game;
+	Game game = new Game();
 	public ObjectInputStream primiPaket = null;
 	String ime;
 	boolean mojaIgra;
@@ -104,9 +104,9 @@ public class ServerNit extends Thread {
 				if (paket.getType() == Paket.DECLINED) {
 					System.out.println("declined server..");
 					for (int i = 0; i < klijenti.size(); i++) {
-						System.out.println("usao u for...");
+						//System.out.println("usao u for...");
 						if (klijenti.get(i).ime.equals(paket.getPoruka())) {
-							System.out.println("Usao u if...");
+							//System.out.println("Usao u if...");
 							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.DECLINED, this.ime));
 						}
 					}
@@ -114,7 +114,7 @@ public class ServerNit extends Thread {
 
 				if (paket.getType() == Paket.ACCEPTED) {
 					System.out.println("Accepted server..");
-					System.out.println("Resenje: "+Game.q +","+ Game.w+ "," + Game.e + "," + Game.r);
+					System.out.println("Resenje: "+game.q +","+ game.w+ "," + game.e + "," + game.r);
 
 					for (int i = 0; i < klijenti.size(); i++) {
 						//System.out.println("usao u for...");
@@ -125,8 +125,8 @@ public class ServerNit extends Thread {
 							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.ACCEPTED, "izazvac si"));
 							saljiPaket.writeObject(new Paket(Paket.ACCEPTED, "izazvan si"));
 							klijenti.get(i).mojaIgra = true;
-							klijenti.get(i).game = new Game();
-							this.game = new Game();
+						//	klijenti.get(i).game = new Game();
+						//	this.game = new Game();
 							uIgric = true;
 							klijenti.get(i).uIgric = true;
 							imeProtivnika = klijenti.get(i).ime;
@@ -184,10 +184,10 @@ public class ServerNit extends Thread {
 				
 				if(paket.getType() == Paket.OFFLINE){
 					//System.out.println("offline");
-					int a = Game.q;
-					int b = Game.w;
-					int c = Game.e;
-					int d = Game.r;
+					int a = game.q;
+					int b = game.w;
+					int c = game.e;
+					int d = game.r;
 					for (int i = 0; i < klijenti.size(); i++) {
 						if (klijenti.get(i).ime.equals(imeProtivnika)) {
 							klijenti.get(i).uIgric = false;
