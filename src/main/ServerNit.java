@@ -125,8 +125,8 @@ public class ServerNit extends Thread {
 							klijenti.get(i).saljiPaket.writeObject(new Paket(Paket.ACCEPTED, "izazvac si"));
 							saljiPaket.writeObject(new Paket(Paket.ACCEPTED, "izazvan si"));
 							klijenti.get(i).mojaIgra = true;
-						//	klijenti.get(i).game = new Game();
-						//	this.game = new Game();
+							klijenti.get(i).game = new Game();
+							this.game = new Game();
 							uIgric = true;
 							klijenti.get(i).uIgric = true;
 							imeProtivnika = klijenti.get(i).ime;
