@@ -130,6 +130,7 @@ public class ServerNit extends Thread {
 							uIgric = true;
 							klijenti.get(i).uIgric = true;
 							imeProtivnika = klijenti.get(i).ime;
+							
 							klijenti.get(i).imeProtivnika = this.ime;
 						}
 					}
@@ -184,10 +185,19 @@ public class ServerNit extends Thread {
 				
 				if(paket.getType() == Paket.OFFLINE){
 					//System.out.println("offline");
-					int a = game.q;
-					int b = game.w;
-					int c = game.e;
-					int d = game.r;
+					int a = 0;
+					int b = 0;
+					int c = 0;
+					int d = 0;
+					for (int i = 0; i < klijenti.size(); i++) {
+						if (klijenti.get(i).ime.equals(imeProtivnika)) {
+							a = klijenti.get(i).game.q;
+							b = klijenti.get(i).game.w;
+							c = klijenti.get(i).game.e;
+							d = klijenti.get(i).game.r;
+						}
+					}
+					
 					for (int i = 0; i < klijenti.size(); i++) {
 						if (klijenti.get(i).ime.equals(imeProtivnika)) {
 							klijenti.get(i).uIgric = false;
@@ -200,6 +210,16 @@ public class ServerNit extends Thread {
 
 				if (paket.getType() == Paket.WIN) {
 					//System.out.println("win paket server, protivnik : "+imeProtivnika);
+					for (int i = 0; i < klijenti.size(); i++) {
+						if (klijenti.get(i).ime.equals(imeProtivnika)) {
+							klijenti.get(i).saljiPaket.writeObject(paket);
+							saljiPaket.writeObject(paket);
+						}
+					}
+				}
+				
+				if (paket.getType() == Paket.END) {
+				
 					for (int i = 0; i < klijenti.size(); i++) {
 						if (klijenti.get(i).ime.equals(imeProtivnika)) {
 							klijenti.get(i).saljiPaket.writeObject(paket);
