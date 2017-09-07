@@ -4,8 +4,8 @@ import java.util.LinkedList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Game {
-	public static int brPogodjenihNaMestu = 0;
-	public static int brPogodjenih = 0;
+	int brPogodjenihNaMestu = 0;
+	int brPogodjenih = 0;
 	private LinkedList<String> users = new LinkedList<>();
 	 int q = ThreadLocalRandom.current().nextInt(1, 7);
 	 int w = ThreadLocalRandom.current().nextInt(1, 7);
@@ -18,7 +18,7 @@ public class Game {
 	// zvezda...5
 	// joker....6
 
-	public static void proveriResenje(int q, int w, int e, int r, int q1, int w1, int e1, int r1) {
+	public void proveriResenje(int q, int w, int e, int r, int q1, int w1, int e1, int r1) {
 		LinkedList<Simbol> resenje = new LinkedList<>();
 		LinkedList<Simbol> pokusaj = new LinkedList<>();
 
