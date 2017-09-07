@@ -221,9 +221,11 @@ public class ServerNit extends Thread {
 				if (paket.getType() == Paket.END) {
 				
 					for (int i = 0; i < klijenti.size(); i++) {
-						if (klijenti.get(i).ime.equals(imeProtivnika)) {
+						if (klijenti.get(i).ime.equals(imeProtivnika)) {	
+							klijenti.get(i).uIgric = false;
+							uIgric = false;
 							klijenti.get(i).saljiPaket.writeObject(paket);
-							saljiPaket.writeObject(paket);
+							this.saljiPaket.writeObject(paket);
 						}
 					}
 				}
